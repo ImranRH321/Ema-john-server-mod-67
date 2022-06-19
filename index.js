@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 /* ------------------------------------ */
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.e3ox5.mongodb.net/?retryWrites=true&w=majority`;
-console.log("uri", uri);
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -32,10 +32,21 @@ async function run() {
       const query = {};
       const cursor = productCollection.find(query);
       const result = await cursor.toArray();
-      console.log(result);
       res.send(result);
-      /* ... */
     });
+    /* ... */
+    /* read */
+    app.get("/productCount", async (req, res) => {
+      const query = {};
+      const cursor = productCollection.find(query);
+      const count = await cursor.count();
+      console.log(count , 'res');
+      res.send({count});
+    });
+    /* ... */
+
+
+
   } finally {
   }
 }
