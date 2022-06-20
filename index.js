@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const { parse } = require("dotenv");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -29,24 +30,33 @@ async function run() {
     const productCollection = client.db("emaJohn1").collection("product");
     /* read */
     app.get("/product", async (req, res) => {
+      const page = parseInt(req.query.pages);
+      const size = parseInt(req.query.size);
+      console.log(page, size);
+
       const query = {};
       const cursor = productCollection.find(query);
-      const result = await cursor.toArray();
-      res.send(result);
+
+      let product;
+      if (page || size) {
+        product = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        product = await cursor.toArray();
+      }
+
+      res.send(product);
     });
     /* ... */
-    /* read */
+
     app.get("/productCount", async (req, res) => {
-      const query = {};
-      const cursor = productCollection.find(query);
-      const count = await cursor.count();
-      console.log(count , 'res');
-      res.send({count});
+      const count = await productCollection.estimatedDocumentCount();
+      // console.log(count , 'res');
+      res.send({ count });
     });
     /* ... */
-
-
-
   } finally {
   }
 }
